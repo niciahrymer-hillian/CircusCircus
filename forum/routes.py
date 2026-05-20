@@ -97,19 +97,24 @@ def viewpost():
 	post = Post.query.filter(Post.id == postid).first()
 	if not post:
 		return error("That post does not exist!")
-	if not post.subforum.path:
+	comment_error = request.args.get("comment_error")
+	subforumpath = post.subforum.path
+	if not subforumpath:
 		subforumpath = generateLinkPath(post.subforum.id)
+		post.subforum.path = subforumpath
 	comments = Comment.query.filter(Comment.post_id == postid).order_by(Comment.id.desc()) # no need for scalability now
-	return render_template("viewpost.html", post=post, path=subforumpath, comments=comments)
+	return render_template("viewpost.html", post=post, path=subforumpath, comments=comments, comment_error=comment_error)
 
 @login_required
-@rt.route('/action_comment', methods=['POST', 'GET'])
+@rt.route('/action_comment', methods=['POST'])
 def comment():
 	post_id = int(request.args.get("post"))
 	post = Post.query.filter(Post.id == post_id).first()
 	if not post:
 		return error("That post does not exist!")
-	content = request.form['content']
+	content = request.form.get('content', '').strip()
+	if len(content) < 1:
+		return redirect("/viewpost?post=" + str(post_id) + "&comment_error=empty")
 	postdate = datetime.datetime.now()
 	comment = Comment(content, postdate)
 	current_user.comments.append(comment)

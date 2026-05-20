@@ -18,41 +18,37 @@
 	</div>
 
 </div>
-<div class="addcomment" id="addcomment">
-	<form action="/action_comment?post={{ post.id }}" method="POST">
-		<textarea class="inputbox varwidth" rows="6" name="content"></textarea><br>
-		<input class="inputbox" style="margin-bottom: 1%;" type="submit" value="Comment">
-	</form>
-</div>
 <div style="text-align: center;">
-
-	
-
 	{% if current_user.is_authenticated %}
+	{% if comment_error == 'empty' %}
+	<div class="error">Comment cannot be empty.</div>
+	{% endif %}
 	<input type="button" id="displayaddcomment" onclick="toggle()" value="Add a comment">
+	<div class="addcomment" id="addcomment">
+		<form action="/action_comment?post={{ post.id }}" method="POST">
+			<textarea class="inputbox varwidth" rows="6" name="content" placeholder="Write your comment..."></textarea><br>
+			<input class="inputbox" style="margin-bottom: 1%;" type="submit" value="Comment">
+		</form>
+	</div>
 
 	{% else %}
 	<a href="/loginform">Login or register to make a comment</a>
 	{% endif %}
 </div>
-{%if comments%}
+{% if comments.first() %}
 <div class="comments">
 {% for comment in comments %}
-	
 	<div class="comment">
 		<div class="commentuser">
-			(<span  {% if comment.user.admin %} style="color: red;" {% endif %}>{{ comment.user.username }}</span>) - 
+			<span {% if comment.user.admin %} style="color: red;" {% endif %}>{{ comment.user.username }}</span>
+		</div>
+		<div class="commenttime">
+			{{ comment.get_time_string() }}
 		</div>
 		<div class="commentcontent">
 			{{ comment.content }}
 		</div>
-		
-		<div class="commenttime">
-			{{ comment.get_time_string() }}
-		</div>
 	</div>
-	<br>
-	
 {% endfor %}
 </div>
 {% endif %}
