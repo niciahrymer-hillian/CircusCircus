@@ -16,6 +16,27 @@
 	<div class="postcontent">
 		{{post.content}}
 	</div>
+	<div class="reactions">
+		{% if current_user.is_authenticated %}
+		<form class="reactionform" action="/action_react?post={{ post.id }}&type=like" method="POST">
+			<input type="hidden" name="next" value="{{ current_path }}">
+			<button type="submit" class="reactionbutton {% if user_reaction == 'like' %}active-reaction{% endif %}">👍 {{ post_reaction_counts['like'] }}</button>
+		</form>
+		<form class="reactionform" action="/action_react?post={{ post.id }}&type=dislike" method="POST">
+			<input type="hidden" name="next" value="{{ current_path }}">
+			<button type="submit" class="reactionbutton {% if user_reaction == 'dislike' %}active-reaction{% endif %}">👎 {{ post_reaction_counts['dislike'] }}</button>
+		</form>
+		<form class="reactionform" action="/action_react?post={{ post.id }}&type=heart" method="POST">
+			<input type="hidden" name="next" value="{{ current_path }}">
+			<button type="submit" class="reactionbutton {% if user_reaction == 'heart' %}active-reaction{% endif %}">❤️ {{ post_reaction_counts['heart'] }}</button>
+		</form>
+		<div class="reactionhint">Click again to remove your reaction.</div>
+		{% else %}
+		<span class="reactioncount">👍 {{ post_reaction_counts['like'] }}</span>
+		<span class="reactioncount">👎 {{ post_reaction_counts['dislike'] }}</span>
+		<span class="reactioncount">❤️ {{ post_reaction_counts['heart'] }}</span>
+		{% endif %}
+	</div>
 
 </div>
 <div style="text-align: center;">
