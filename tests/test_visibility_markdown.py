@@ -15,7 +15,7 @@ def app(tmp_path):
     config.Config.SQLALCHEMY_DATABASE_URI = f"sqlite:///{db_file}"
 
     app = create_app()
-    app.config.update(TESTING=True)
+    app.config.update(TESTING=True, SECRET_KEY="test-secret")
 
     login_manager = LoginManager()
     login_manager.init_app(app)

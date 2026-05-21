@@ -52,20 +52,37 @@ $ ./run.sh
 ```
 
 The app runs on port 5006:
+http://127.0.0.1:5006
 
-`http://127.0.0.1:5006`
+If port 5006 is already in use, `run.sh` automatically selects the next open port.
+
+### Environment variables (.env)
+
+The app loads environment variables from `.env` (via `python-dotenv`).
+
+- `SECRET_KEY`: recommended for sessions/login.
+- `DATABASE_URL`: optional; defaults to local SQLite (`sqlite:///circuscircus.db`).
+
+Example:
+
+```env
+SECRET_KEY=replace-this-with-a-random-secret
+DATABASE_URL=sqlite:///circuscircus.db
+```
 
 ## Troubleshooting
 
 - Port already in use
-  - Start on a different port:
-    - `cd forum && flask run --port=5007`
-  - Or find/stop the process using port 5006:
+  - `run.sh` auto-increments to the next open port.
+  - To force a port manually:
+    - `PORT=5007 ./run.sh`
+  - To find/stop the process using port 5006:
     - `lsof -i :5006`
 
-- `flask` command not found
-  - Activate your virtual environment first:
-    - `source .venv/bin/activate`
+- Missing `.env` / session errors
+  - Ensure `SECRET_KEY` is set in `.env`.
+  - Install dependencies in the active venv:
+    - `pip install -r requirements.txt`
 
 - Missing package/module errors
   - Reinstall dependencies in the active venv:
