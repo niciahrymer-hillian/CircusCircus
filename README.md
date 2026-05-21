@@ -32,19 +32,48 @@ On first run, the default subforums will be created. Although custom subforums a
 I had to make a bunch of changes in this code to get it running. Took far longer than it should.
 But now, if I have it right, you need to clone this and then
 
-This currently puts a sqlite3 db in the /tmp directory.
-(use atleast python 3.11)
+This currently puts a sqlite3 db in the `instance/` directory.
+(use at least python 3.11)
+
+## Run Locally
+
+1. Open a terminal and go to the project root.
+2. Create and activate a virtual environment.
+3. Install dependencies.
+4. Start the app with `run.sh`.
+5. Open the app in your browser.
 
 ```
-$ python3.11 -m venv venv
-$ source venv/bin/activate
+$ cd /Users/shocka/CircusCircus
+$ python3.11 -m venv .venv
+$ source .venv/bin/activate
 $ pip install -r requirements.txt
 $ ./run.sh
 ```
 
-and it should appear on port 5000
+The app runs on port 5006:
 
-`http://0.0.0.0:5000`
+`http://127.0.0.1:5006`
+
+## Troubleshooting
+
+- Port already in use
+  - Start on a different port:
+    - `cd forum && flask run --port=5007`
+  - Or find/stop the process using port 5006:
+    - `lsof -i :5006`
+
+- `flask` command not found
+  - Activate your virtual environment first:
+    - `source .venv/bin/activate`
+
+- Missing package/module errors
+  - Reinstall dependencies in the active venv:
+    - `pip install -r requirements.txt`
+
+- App not loading at `127.0.0.1:5006`
+  - Confirm the server is running and that you launched from the project root with:
+    - `./run.sh`
 
 ## Changes in 2023
 
