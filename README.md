@@ -38,18 +38,15 @@ This currently puts a sqlite3 db in the `instance/` directory.
 ## Run Locally
 
 1. Open a terminal and go to the project root.
-2. Create and activate a virtual environment.
-3. Install dependencies.
-4. Start the app with `run.sh`.
-5. Open the app in your browser.
+2. Start the app with the one-click launcher.
+3. Open the app in your browser.
 
 ```
 $ cd /Users/shocka/CircusCircus
-$ python3.11 -m venv .venv
-$ source .venv/bin/activate
-$ pip install -r requirements.txt
-$ ./run.sh
+$ ./start_app.sh
 ```
+
+On macOS, you can also double-click `start_app.command` in Finder.
 
 The app runs on port 5006:
 http://127.0.0.1:5006
