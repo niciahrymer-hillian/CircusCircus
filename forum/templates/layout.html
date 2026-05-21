@@ -21,7 +21,13 @@
 	</div>
 {% endif %}
 	<div class="content">
-		{% block body %}{% endblock %}
+		<div class="container">
+			<div class="row">
+				<div class="col">
+					{% block body %}{% endblock %}
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
 </body>
