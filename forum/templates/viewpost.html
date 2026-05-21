@@ -5,66 +5,92 @@
 		<div class="col">
 			{{ path|safe }}
 
+<<<<<<< HEAD
 			<div class="actualpost">
 				<div class="actualposttitle">
 					<a href="/viewpost?post={{ post.id }}">{{post.title}}</a>
 					<div class="postposter" {% if post.user.admin %} style="color: red;" {% endif %}>
 						{{ post.user.username }}
 					</div>
-					<div class="posttime">
-						{{ post.get_time_string() }}
+					{% block body %}
+					<div class="container">
+					  <div class="row">
+					    <div class="col">
+					      {{ path|safe }}
+					      <div class="actualpost">
+					        <div class="actualposttitle">
+					          <a href="/viewpost?post={{ post.id }}">{{post.title}}</a>
+					          {% if current_user.is_authenticated and not post.is_public %}
+					          <span class="visibilitybadge">Private</span>
+					          {% endif %}
+					          <div class="postposter" {% if post.user.admin %} style="color: red;" {% endif %}>
+					            {{ post.user.username }}
+					          </div>
+					          <div class="posttime">
+					            {{ post.get_time_string() }}
+					          </div>
+					        </div>
+					        <div class="postcontent">
+					          {{ post.content | markdown }}
+					        </div>
+					        <div class="reactions">
+					          {% if current_user.is_authenticated %}
+					          <form class="reactionform" action="/action_react?post={{ post.id }}&type=like" method="POST">
+					            <input type="hidden" name="next" value="{{ current_path }}">
+					            <button type="submit" class="reactionbutton {% if user_reaction == 'like' %}active-reaction{% endif %}">👍 {{ post_reaction_counts['like'] }}</button>
+					          </form>
+					          <form class="reactionform" action="/action_react?post={{ post.id }}&type=dislike" method="POST">
+					            <input type="hidden" name="next" value="{{ current_path }}">
+					            <button type="submit" class="reactionbutton {% if user_reaction == 'dislike' %}active-reaction{% endif %}">👎 {{ post_reaction_counts['dislike'] }}</button>
+					          </form>
+					          <form class="reactionform" action="/action_react?post={{ post.id }}&type=heart" method="POST">
+					            <input type="hidden" name="next" value="{{ current_path }}">
+					            <button type="submit" class="reactionbutton {% if user_reaction == 'heart' %}active-reaction{% endif %}">❤️ {{ post_reaction_counts['heart'] }}</button>
+					          </form>
+					          <div class="reactionhint">Click again to remove your reaction.</div>
+					          {% else %}
+					          <span class="reactioncount">👍 {{ post_reaction_counts['like'] }}</span>
+					          <span class="reactioncount">👎 {{ post_reaction_counts['dislike'] }}</span>
+					          <span class="reactioncount">❤️ {{ post_reaction_counts['heart'] }}</span>
+					          {% endif %}
+					        </div>
+					      </div>
+					      <div style="text-align: center;">
+					        {% if current_user.is_authenticated %}
+					        {% if comment_error == 'empty' %}
+					        <div class="error">Comment cannot be empty.</div>
+					        {% endif %}
+					        <input type="button" id="displayaddcomment" onclick="toggle()" value="Add a comment">
+					        <div class="addcomment" id="addcomment">
+					          <form action="/action_comment?post={{ post.id }}" method="POST">
+					            <textarea class="inputbox varwidth" rows="6" name="content" placeholder="Write your comment..."></textarea><br>
+					            <input class="inputbox" style="margin-bottom: 1%;" type="submit" value="Comment">
+					          </form>
+					        </div>
+					        {% else %}
+					        <a href="/loginform">Login or register to make a comment</a>
+					        {% endif %}
+					      </div>
+					      {% if comments.first() %}
+					      <div class="comments">
+					        {% for comment in comments %}
+					        <div class="comment">
+					          <div class="commentuser">
+					            <span {% if comment.user.admin %} style="color: red;" {% endif %}>{{ comment.user.username }}</span>
+					          </div>
+					          <div class="commenttime">
+					            {{ comment.get_time_string() }}
+					          </div>
+					          <div class="commentcontent">
+					            {{ comment.content }}
+					          </div>
+					        </div>
+					        {% endfor %}
+					      </div>
+					      {% endif %}
+					    </div>
+					  </div>
 					</div>
-				</div>
-				<div class="postcontent">
-					{{post.content}}
-				</div>
-			</div>
-			<div class="addcomment" id="addcomment">
-				<form action="/action_comment?post={{ post.id }}" method="POST">
-					<textarea class="inputbox varwidth" rows="6" name="content"></textarea><br>
-					<input class="inputbox" style="margin-bottom: 1%;" type="submit" value="Comment">
-				</form>
-			</div>
-			<div style="text-align: center;">
-				{% if current_user.is_authenticated %}
-				<input type="button" id="displayaddcomment" onclick="toggle()" value="Add a comment">
-				{% else %}
-				<a href="/loginform">Login or register to make a comment</a>
-				{% endif %}
-			</div>
-			{% if comments %}
-			<div class="comments">
-				{% for comment in comments %}
-				<div class="comment">
-					<div class="commentuser">
-						(<span {% if comment.user.admin %} style="color: red;" {% endif %}>{{ comment.user.username }}</span>) -
-					</div>
-					<div class="commentcontent">
-						{{ comment.content }}
-					</div>
-					<div class="commenttime">
-						{{ comment.get_time_string() }}
-					</div>
-				</div>
-				<br>
-				{% endfor %}
-			</div>
-			{% endif %}
-		</div>
-	</div>
-</div>
-<script type="text/javascript">
-function toggle(){
-	var div = document.getElementById("addcomment");
-	var button = document.getElementById("displayaddcomment")
-	if(div.style.display == "none" || div.style.display.trim() == ""){
-		div.style.display = "inline";
-		button.value="Hide";
-	}else{
-		div.style.display = "none";
-		button.value="Add a comment"
-	}
-	
 }
 </script>
 
