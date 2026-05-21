@@ -4,27 +4,73 @@
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename="bootstrap.min.css")}}">
 	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename="style.css")}}">
 	<title>{{ config.SITE_NAME }}</title>
+	<style>
+		body {
+			display: flex;
+			flex-direction: column;
+			min-height: 100vh;
+		}
+		.page-wrapper {
+			flex: 1;
+		}
+		footer {
+			background-color: #f8f9fa;
+			border-top: 1px solid #dee2e6;
+			padding: 20px 0;
+			margin-top: 40px;
+			text-align: center;
+			color: #6c757d;
+			font-size: 0.9rem;
+		}
+		footer a {
+			color: #0d6efd;
+			text-decoration: none;
+		}
+		footer a:hover {
+			text-decoration: underline;
+		}
+	</style>
 </head>
 <body>
-<div class="page">
-	<div class="header">
-		{% include 'header.html' %}
-	</div>
-	{% if errors %}
-	<div class="errors">
-	{% for error in errors %}
-		<p class="error">
-			{{ error }}
-		</p>
-
-	{% endfor %}
-	</div>
-{% endif %}
-	<div class="content">
-		{% block body %}{% endblock %}
+<div class="page-wrapper">
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-12">
+				<div class="header">
+					{% include 'header.html' %}
+				</div>
+			</div>
+		</div>
+		{% if errors %}
+		<div class="row">
+			<div class="col-12">
+				<div class="errors">
+				{% for error in errors %}
+					<p class="error">
+						{{ error }}
+					</p>
+				{% endfor %}
+				</div>
+			</div>
+		</div>
+		{% endif %}
+		<div class="row">
+			<div class="col-12">
+				<div class="content">
+					{% block body %}{% endblock %}
+				</div>
+			</div>
+		</div>
 	</div>
 </div>
+<footer>
+	<div class="container-fluid">
+		<p>&copy; 2026 <strong>{{ config.SITE_NAME }}</strong> - 
+			<a href="/">Home</a> | 
+			<a href="#about">About</a>
+		</p>
+		<p style="margin-top: 10px; font-size: 0.85rem;">All rights reserved.</p>
+	</div>
+</footer>
 </body>
-
-
 </html>
