@@ -196,3 +196,42 @@ layout.html          ← base shell: loads CSS, renders header, shows errors blo
 - `@login_required` is placed *above* `@rt.route(...)` on some routes — decorator order is wrong; correct order is `@rt.route(...)` first, then `@login_required`
 - `routes.py` needs to be split into `auth.py`, `posts.py`, `comments.py` — see Epic 2 on GitHub
 - Port 5000 is blocked on macOS by AirPlay Receiver — run on port 5001 instead
+
+  # CircusCircus PostgreSQL migration and Docker workflow
+
+  ## Step-by-step workflow
+
+  1. **Switch to Docker**: All Heroku instructions and configs are deprecated. Use Docker Compose for local and production workflows.
+  2. **Install dependencies**:
+    - Local: `pip install psycopg2-binary`
+    - Container: `psycopg2-binary` in requirements.txt
+  3. **.env setup**:
+    - Add `DATABASE_URL=postgresql://ccuser:Elephant@db/circuscircus` (replace `Elephant` with your password)
+  4. **config.py**:
+    - Loads DB URI from .env using python-dotenv
+    - Host is `db` (Docker service name)
+    - Fallbacks to SQLite for local dev if env var is missing
+  5. **docker-compose.yml**:
+    - Defines `db` (Postgres) and `web` (app) services
+    - Healthcheck ensures app waits for DB readiness
+    - Uses custom Docker network for isolation
+    - Links services, sets env vars, exposes ports
+  6. **Testing**:
+    - `docker compose up`
+    - `docker exec -it <container> bash`
+    - Run `python` shell:
+      ```python
+      from forum.models import db
+      db.create_all()
+      # Seed subforums, test CRUD for User, Post, Comment, Subforum
+      ```
+  7. **Deploy**:
+    - `docker build -t circuscircus .`
+    - `docker push <your-registry>/circuscircus`
+    - Deploy to Railway, Render, Fly.io, etc.
+    - Smoke test live URL
+
+  ---
+
+  # [WHY] This workflow ensures local and production environments match, with secure credential handling and persistent data.
+  # [EFFECT] Simplifies onboarding, testing, and deployment for all contributors.

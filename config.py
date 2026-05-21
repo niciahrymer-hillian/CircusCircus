@@ -1,6 +1,7 @@
 """
 Flask configuration variables.
 """
+
 from os import environ, path
 from dotenv import load_dotenv
 
@@ -14,6 +15,9 @@ class Config:
     FLASK_APP = 'forum.app'
 
     # Database
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///circuscircus.db'
+    # Use DATABASE_URL from .env, fallback to SQLite for local dev
+    # For Docker/PostgreSQL: postgresql://ccuser:<password>@db/circuscircus
+    # Note: host must be 'db' (Docker service name), not 'localhost'
+    SQLALCHEMY_DATABASE_URI = environ.get('DATABASE_URL', 'sqlite:///circuscircus.db')
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
