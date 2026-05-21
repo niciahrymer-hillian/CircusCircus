@@ -1,0 +1,43 @@
+# Annotated reference for docker-compose.yml
+# [WHY] This file defines the multi-container setup for local and production deployment using Docker Compose.
+# [EFFECT] Ensures the app and PostgreSQL DB are started together, with correct networking and environment variables.
+
+services:
+  db:  # [SERVICE] PostgreSQL database service
+    image: postgres  # [CONSTANT] Official postgres image
+    environment:
+      POSTGRES_USER: ccuser  # [CONSTANT] DB username
+      POSTGRES_PASSWORD: Elephant  # [SECURITY] Example password, replace in production
+      POSTGRES_DB: circuscircus  # [CONSTANT] DB name
+    ports:
+      - "5432:5432"  # [EFFECT] Exposes DB port for local dev
+    volumes:
+      - circuscircus-db-data:/var/lib/postgresql  # [EFFECT] Persists DB data
+    networks:
+      - app-network  # [EFFECT] Isolates DB and app in a private network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ccuser -d circuscircus"]  # [EFFECT] Wait for DB to be ready
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:  # [SERVICE] Flask/Gunicorn app
+    build: .  # [EFFECT] Builds from Dockerfile in project root
+    command: gunicorn forum.app:app --bind 0.0.0.0:8000  # [EFFECT] Runs app with Gunicorn, binds all interfaces
+    env_file:
+      - .env  # [EFFECT] Loads environment variables from .env file
+    environment:
+      DATABASE_URL: postgresql://ccuser:Elephant@db/circuscircus  # [EFFECT] App DB connection string
+    depends_on:
+      db:
+        condition: service_healthy  # [EFFECT] Wait for DB healthcheck
+    ports:
+      - "8000:8000"  # [EFFECT] Exposes app port
+    networks:
+      - app-network  # [EFFECT] Isolates app and DB
+
+networks:
+  app-network:  # [EFFECT] Custom Docker network for isolation
+
+volumes:
+  circuscircus-db-data:  # [EFFECT] Named volume for DB persistence

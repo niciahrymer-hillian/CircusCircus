@@ -2,6 +2,9 @@ from flask import Flask
 from markupsafe import Markup
 import mistune
 from forum.routes import rt
+from forum.auth import auth
+from forum.posts import posts
+from forum.comments import comments
 
 def create_app():
     """Construct the core application."""
@@ -22,6 +25,9 @@ def create_app():
     # subforum_routes
     # etc
     app.register_blueprint(rt)
+    app.register_blueprint(auth)
+    app.register_blueprint(posts)
+    app.register_blueprint(comments)
     # Set globals
     from forum.models import db
     db.init_app(app)
@@ -30,4 +36,3 @@ def create_app():
         # Add some routes
         db.create_all()
         return app
-
