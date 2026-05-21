@@ -126,7 +126,7 @@ def handler():
 
 ---
 
-## Layer 4 — Templates (the Front End)P
+## Layer 4 — Templates (the Front End)
 
 Templates are HTML files with **Jinja2** — Flask's templating language.
 - `{{ variable }}` — outputs a value into the HTML
@@ -161,6 +161,41 @@ layout.html          ← base shell: loads CSS, renders header, shows errors blo
    → Browser receives the finished page
 
 2. User types a comment, clicks "Comment"
+   → Browser POSTs to /action_comment?post=3
+   → Flask calls comment() in routes.py
+   → Reads request.form['content']
+   → Creates Comment(content, now)
+   → current_user.comments.append(comment)   ← links Comment to User in DB
+   → post.comments.append(comment)           ← links Comment to Post in DB
+   → db.session.commit()                     ← writes to SQLite
+   → redirect("/viewpost?post=3")            ← browser reloads page with new comment visible
+```
+
+---
+
+## What's Front End vs Back End?
+
+| Front End | Back End |
+|---|---|
+| `templates/*.html` — page structure | `routes.py` — handles every request |
+| `static/bootstrap.min.css` — Bootstrap styles | `models.py` — DB schema + queries |
+| `static/style.css` — custom styles | `user.py` — validation helpers |
+| Jinja2 `{{ }}` tags — fills in data | `app.py` — wires everything together |
+| One small JS `toggle()` in viewpost | `config.py` — app settings |
+
+### Where is the Business Logic?
+
+- **`routes.py`** — input validation, auth checks, relationship wiring between models
+- **`models.py`** — `get_time_string()` cache, `generateLinkPath()` breadcrumb builder, `valid_title/content()` rules
+
+---
+
+## Known Issues to Fix (see GitHub Issues)
+
+- `SECRET_KEY = 'kristofer'` in `config.py` — must move to `.env` before any public push (security risk)
+- `@login_required` is placed *above* `@rt.route(...)` on some routes — decorator order is wrong; correct order is `@rt.route(...)` first, then `@login_required`
+- `routes.py` needs to be split into `auth.py`, `posts.py`, `comments.py` — see Epic 2 on GitHub
+- Port 5000 is blocked on macOS by AirPlay Receiver — run on port 5001 instead
 
   # CircusCircus PostgreSQL migration and Docker workflow
 
