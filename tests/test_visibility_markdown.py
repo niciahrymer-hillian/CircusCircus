@@ -5,7 +5,7 @@ from flask_login import LoginManager
 
 import config
 from forum import create_app
-from forum.models import Comment, Post, Subforum, User, db
+from forum.models import Comment, Post, Reaction, Subforum, User, db
 
 
 @pytest.fixture()
@@ -188,3 +188,52 @@ def test_action_post_sets_visibility_from_checkbox(client, app):
         assert public_post is not None
         assert private_post.is_public is False
         assert public_post.is_public is True
+
+
+def test_viewpost_uses_hover_emoji_picker_and_hides_zero_count_reactions(client, app):
+    with app.app_context():
+        user = _seed_user("reactor", "reactor@example.com")
+        subforum = _seed_subforum("Reactions", "Reaction tests")
+        post = _seed_post(subforum, user, "React Here", "Enough content for reactions.", True)
+
+    _log_in(client, user)
+
+    react_response = client.post(
+        f"/action_react?post={post}&type=heart",
+        data={"next": f"/viewpost?post={post}"},
+    )
+    assert react_response.status_code == 302
+
+    response = client.get(f"/viewpost?post={post}")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "reactionpicker" in body
+    assert "reactionmenu" in body
+    assert "reactionoption" in body
+    assert "❤️ 1" in body
+    assert "👍 0" not in body
+    assert "👎 0" not in body
+
+
+def test_subforum_shows_only_selected_reaction_badges_after_reacting(client, app):
+    with app.app_context():
+        user = _seed_user("picker", "picker@example.com")
+        subforum = _seed_subforum("Emoji Board", "Emoji reaction board")
+        post = _seed_post(subforum, user, "Hover Picker", "Enough content for the subforum view.", True)
+        reaction = Reaction("like")
+        reaction.user_id = user
+        reaction.post_id = post
+        db.session.add(reaction)
+        db.session.commit()
+
+    _log_in(client, user)
+    response = client.get(f"/subforum?sub={subforum}")
+    body = response.get_data(as_text=True)
+
+    assert response.status_code == 200
+    assert "reactionpicker" in body
+    assert "reactionmenu" in body
+    assert "👍 1" in body
+    assert "👎 0" not in body
+    assert "❤️ 0" not in body

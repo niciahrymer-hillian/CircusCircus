@@ -57,23 +57,43 @@
 		</div>
 		<div class="reactions">
 			{% if current_user.is_authenticated %}
-			<form class="reactionform" action="/action_react?post={{ post.id }}&type=like" method="POST">
-				<input type="hidden" name="next" value="{{ current_path }}">
-				<button type="submit" class="reactionbutton {% if user_reactions.get(post.id) == 'like' %}active-reaction{% endif %}">👍 {{ reaction_counts[post.id]['like'] }}</button>
-			</form>
-			<form class="reactionform" action="/action_react?post={{ post.id }}&type=dislike" method="POST">
-				<input type="hidden" name="next" value="{{ current_path }}">
-				<button type="submit" class="reactionbutton {% if user_reactions.get(post.id) == 'dislike' %}active-reaction{% endif %}">👎 {{ reaction_counts[post.id]['dislike'] }}</button>
-			</form>
-			<form class="reactionform" action="/action_react?post={{ post.id }}&type=heart" method="POST">
-				<input type="hidden" name="next" value="{{ current_path }}">
-				<button type="submit" class="reactionbutton {% if user_reactions.get(post.id) == 'heart' %}active-reaction{% endif %}">❤️ {{ reaction_counts[post.id]['heart'] }}</button>
-			</form>
-			<div class="reactionhint">Click again to remove your reaction.</div>
+			<div class="reactionpicker">
+				<button type="button" class="reactiontrigger {% if user_reactions.get(post.id) %}active-reaction{% endif %}">
+					{% if user_reactions.get(post.id) %}
+						{% for reaction_type, emoji, label in reaction_options %}
+							{% if user_reactions.get(post.id) == reaction_type %}
+								{{ emoji }} {{ reaction_counts[post.id][reaction_type] }}
+							{% endif %}
+						{% endfor %}
+					{% else %}
+						😀 React
+					{% endif %}
+				</button>
+				<div class="reactionmenu">
+					{% for reaction_type, emoji, label in reaction_options %}
+					<form class="reactionform" action="/action_react?post={{ post.id }}&type={{ reaction_type }}" method="POST">
+						<input type="hidden" name="next" value="{{ current_path }}">
+						<button type="submit" class="reactionoption {% if user_reactions.get(post.id) == reaction_type %}active-reaction{% endif %}" title="{{ label }}">{{ emoji }}</button>
+					</form>
+					{% endfor %}
+				</div>
+			</div>
+			<div class="reactionsummary">
+				{% for reaction_type, emoji, label in reaction_options %}
+					{% if reaction_counts[post.id][reaction_type] > 0 %}
+					<span class="reactioncount {% if user_reactions.get(post.id) == reaction_type %}active-reaction{% endif %}">{{ emoji }} {{ reaction_counts[post.id][reaction_type] }}</span>
+					{% endif %}
+				{% endfor %}
+			</div>
+			<div class="reactionhint">Hover to choose an emoji. Click the same emoji again to remove it.</div>
 			{% else %}
-			<span class="reactioncount">👍 {{ reaction_counts[post.id]['like'] }}</span>
-			<span class="reactioncount">👎 {{ reaction_counts[post.id]['dislike'] }}</span>
-			<span class="reactioncount">❤️ {{ reaction_counts[post.id]['heart'] }}</span>
+			<div class="reactionsummary">
+				{% for reaction_type, emoji, label in reaction_options %}
+					{% if reaction_counts[post.id][reaction_type] > 0 %}
+					<span class="reactioncount">{{ emoji }} {{ reaction_counts[post.id][reaction_type] }}</span>
+					{% endif %}
+				{% endfor %}
+			</div>
 			{% endif %}
 		</div>
 	</div>

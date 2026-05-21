@@ -12,7 +12,12 @@ from forum.user import username_taken, email_taken, valid_username
 ##
 
 rt = Blueprint('routes', __name__, template_folder='templates')
-ALLOWED_REACTIONS = {"like", "dislike", "heart"}
+REACTION_OPTIONS = (
+	("like", "👍", "Like"),
+	("dislike", "👎", "Dislike"),
+	("heart", "❤️", "Heart"),
+)
+ALLOWED_REACTIONS = {reaction_type for reaction_type, _, _ in REACTION_OPTIONS}
 
 def get_reaction_data(post_ids):
 	counts_by_post = {}
@@ -66,7 +71,7 @@ def subforum():
 	subforums = Subforum.query.filter(Subforum.parent_id == subforum_id).all()
 	post_ids = [post.id for post in posts]
 	reaction_counts, user_reactions = get_reaction_data(post_ids)
-	return render_template("subforum.html", subforum=subforum, posts=posts, subforums=subforums, path=subforumpath, reaction_counts=reaction_counts, user_reactions=user_reactions, current_path="/subforum?sub=" + str(subforum.id))
+	return render_template("subforum.html", subforum=subforum, posts=posts, subforums=subforums, path=subforumpath, reaction_counts=reaction_counts, user_reactions=user_reactions, reaction_options=REACTION_OPTIONS, current_path="/subforum?sub=" + str(subforum.id))
 
 @rt.route('/loginform')
 def loginform():
@@ -96,7 +101,7 @@ def viewpost():
 		post.subforum.path = subforumpath
 	comments = Comment.query.filter(Comment.post_id == postid).order_by(Comment.id.desc()) # no need for scalability now
 	reaction_counts, user_reactions = get_reaction_data([post.id])
-	return render_template("viewpost.html", post=post, path=subforumpath, comments=comments, comment_error=comment_error, post_reaction_counts=reaction_counts.get(post.id), user_reaction=user_reactions.get(post.id), current_path="/viewpost?post=" + str(post.id))
+	return render_template("viewpost.html", post=post, path=subforumpath, comments=comments, comment_error=comment_error, post_reaction_counts=reaction_counts.get(post.id), user_reaction=user_reactions.get(post.id), reaction_options=REACTION_OPTIONS, current_path="/viewpost?post=" + str(post.id))
 
 @login_required
 @rt.route('/action_react', methods=['POST'])
