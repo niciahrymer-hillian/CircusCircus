@@ -234,3 +234,18 @@
 	font-style: italic;
 	color: #444;
 }
+
+.visibilitybadge{
+	display: inline-block;
+	margin-left: 0.5em;
+	padding: 0.05em 0.55em;
+	font-size: 9pt;
+	font-weight: bold;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	border: 1px solid #666;
+	border-radius: 999px;
+	background: #f1f1f1;
+	color: #333;
+	vertical-align: middle;
+}

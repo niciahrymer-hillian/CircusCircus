@@ -105,7 +105,10 @@ def subforum():
 	subforum = Subforum.query.filter(Subforum.id == subforum_id).first()
 	if not subforum:
 		return error("That subforum does not exist!")
-	posts = Post.query.filter(Post.subforum_id == subforum_id).order_by(Post.id.desc()).limit(50).all()
+	post_query = Post.query.filter(Post.subforum_id == subforum_id)
+	if not current_user.is_authenticated:
+		post_query = post_query.filter(Post.is_public == True)
+	posts = post_query.order_by(Post.id.desc()).limit(50).all()
 	subforumpath = subforum.path
 	if not subforumpath:
 		subforumpath = generateLinkPath(subforum.id)
@@ -135,7 +138,7 @@ def addpost():
 def viewpost():
 	postid = int(request.args.get("post"))
 	post = Post.query.filter(Post.id == postid).first()
-	if not post:
+	if not post or (not post.is_public and not current_user.is_authenticated):
 		return error("That post does not exist!")
 	comment_error = request.args.get("comment_error")
 	subforumpath = post.subforum.path
@@ -218,6 +221,7 @@ def action_post():
 	if retry:
 		return render_template("createpost.html",subforum=subforum,  errors=errors)
 	post = Post(title, content, datetime.datetime.now())
+	post.is_public = request.form.get("is_public") == "on"
 	subforum.posts.append(post)
 	user.posts.append(post)
 	db.session.commit()

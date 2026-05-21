@@ -5,6 +5,9 @@
 <div class="actualpost">
 	<div class="actualposttitle">
 		<a href="/viewpost?post={{ post.id }}">{{post.title}}</a>
+		{% if current_user.is_authenticated and not post.is_public %}
+		<span class="visibilitybadge">Private</span>
+		{% endif %}
 		<div class="postposter" {% if post.user.admin %} style="color: red;" {% endif %}>
 			{{ post.user.username }}
 
@@ -14,7 +17,7 @@
 		</div>
 	</div>
 	<div class="postcontent">
-		{{post.content}}
+		{{ post.content | markdown }}
 	</div>
 	<div class="reactions">
 		{% if current_user.is_authenticated %}
