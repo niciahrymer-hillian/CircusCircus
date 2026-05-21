@@ -1,0 +1,40 @@
+
+services:
+  db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ccuser
+      POSTGRES_PASSWORD: Elephant
+      POSTGRES_DB: circuscircus
+    ports:
+      - "5432:5432"
+    volumes:
+      - circuscircus-db-data:/var/lib/postgresql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ccuser -d circuscircus"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build: .
+    command: gunicorn forum.app:app --bind 0.0.0.0:8000
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://ccuser:Elephant@db/circuscircus
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+
+volumes:
+  circuscircus-db-data:

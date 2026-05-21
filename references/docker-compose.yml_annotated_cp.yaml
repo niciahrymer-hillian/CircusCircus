@@ -1,0 +1,27 @@
+# Annotated reference for docker-compose.yml
+# [WHY] This file defines the multi-container setup for local and production deployment using Docker Compose.
+# [EFFECT] Ensures the app and PostgreSQL DB are started together, with correct networking and environment variables.
+
+version: '3.8'  # [CONSTANT] Compose file version
+services:
+  db:  # [SERVICE] PostgreSQL database service
+    image: postgres  # [CONSTANT] Official postgres image
+    environment:
+      POSTGRES_USER: ccuser  # [CONSTANT] DB username
+      POSTGRES_PASSWORD: <password>  # [SECURITY] Replace with a secure password
+      POSTGRES_DB: circuscircus  # [CONSTANT] DB name
+    ports:
+      - "5432:5432"  # [EFFECT] Exposes DB port for local dev
+    volumes:
+      - circuscircus-db-data:/var/lib/postgresql/data  # [EFFECT] Persists DB data
+  web:  # [SERVICE] Flask/Gunicorn app
+    build: .  # [EFFECT] Builds from Dockerfile in project root
+    command: gunicorn forum.app:app  # [EFFECT] Runs app with Gunicorn
+    environment:
+      DATABASE_URL: postgresql://ccuser:<password>@db/circuscircus  # [EFFECT] App DB connection string
+    depends_on:
+      - db  # [EFFECT] Ensures DB starts before app
+    ports:
+      - "8000:8000"  # [EFFECT] Exposes app port
+volumes:
+  circuscircus-db-data:  # [EFFECT] Named volume for DB persistence
