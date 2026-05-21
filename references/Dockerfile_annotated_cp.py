@@ -28,4 +28,4 @@ EXPOSE 8000
 
 # [CMD] Run gunicorn
 CMD ["gunicorn", "forum.app:app", "--bind", "0.0.0.0:8000"]
-# [WHY] Launches the Flask app using gunicorn for production
+# [WHY] Launches the Flask app using gunicorn for production, binds to all interfaces for Docker
