@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="container" style="max-width: 600px; margin: 30px auto;">
+	<h2>Compose Message</h2>
+	
+	{% if errors %}
+	<div style="background-color: #f8d7da; color: #721c24; padding: 12px; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">
+		{% for error in errors %}
+		<p style="margin: 5px 0;">{{ error }}</p>
+		{% endfor %}
+	</div>
+	{% endif %}
+	
+	<form method="POST" action="/compose">
+		<div style="margin-bottom: 20px;">
+			<label for="recipient" style="display: block; margin-bottom: 8px;"><b>Send to:</b></label>
+			<input type="text" id="recipient" name="recipient" placeholder="Enter username" value="{{ to_username }}" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem;">
+			<small style="color: #666; display: block; margin-top: 5px;">Type the exact username of the recipient</small>
+		</div>
+		
+		<div style="margin-bottom: 20px;">
+			<label for="content" style="display: block; margin-bottom: 8px;"><b>Message:</b></label>
+			<textarea id="content" name="content" placeholder="Write your message here..." rows="8" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; font-size: 1rem;"></textarea>
+			<small style="color: #666; display: block; margin-top: 5px;">Max 5000 characters</small>
+		</div>
+		
+		<div style="display: flex; gap: 10px;">
+			<button type="submit" style="padding: 12px 30px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;">Send Message</button>
+			<a href="/inbox" style="padding: 12px 30px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px; text-align: center; display: inline-block;">Cancel</a>
+		</div>
+	</form>
+
+	<hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+	<div style="text-align: center;">
+		<a href="/" style="color: #007bff; text-decoration: none;">Back to Forum</a>
+	</div>
+</div>
+{% endblock %}

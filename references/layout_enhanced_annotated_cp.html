@@ -1,3 +1,33 @@
+"""
+REFERENCE COPY: Updated layout.html with Sidebar Navigation
+
+KEY STRUCTURE CHANGES:
+- Removed Bootstrap container/row/col grid layout
+- Implemented flex-based two-column layout:
+  * Header section at top
+  * Main wrapper with:
+    - Sidebar (220px, white background)
+    - Content area (flex: 1, light gray background)
+  * Footer at bottom
+
+SIDEBAR FEATURES:
+- Responsive navigation menu
+- Direct links to all subforums
+- Authenticated-only sections (Messages, Settings)
+- Hover effects (light blue background + blue left border)
+
+COLOR SCHEME:
+- Header: rgba(13, 110, 253, 0.75) - semi-transparent blue
+- Sidebar: white with subtle border
+- Content area: #f5f7fa - light blue-gray
+- Links: blue (#0d6efd)
+
+RESPONSIVE CONSIDERATIONS:
+- Sidebar width: 220px (fixed)
+- Content area: flex: 1 (takes remaining space)
+- Footer: full width, separate from main wrapper
+"""
+
 <!DOCTYPE html>
 <html>
 <head>

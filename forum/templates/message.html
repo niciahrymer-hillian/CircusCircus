@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="container" style="max-width: 700px; margin: 30px auto;">
+	<div style="background-color: #f8f9fa; padding: 20px; border-radius: 4px; margin-bottom: 30px;">
+		{% if message.sender_id == current_user.id %}
+		<p style="margin: 0; color: #666;"><b>To:</b> {{ message.recipient.username }}</p>
+		{% else %}
+		<p style="margin: 0; color: #666;"><b>From:</b> {{ message.sender.username }}</p>
+		{% endif %}
+		<p style="margin: 5px 0 0 0; color: #999; font-size: 0.9rem;">{{ message.get_time_string() }}</p>
+	</div>
+
+	<div style="background-color: white; padding: 20px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 30px; min-height: 150px;">
+		<p style="line-height: 1.6; white-space: pre-wrap;">{{ message.content }}</p>
+	</div>
+
+	<div style="display: flex; gap: 10px; margin-bottom: 30px;">
+		{% if message.sender_id == current_user.id %}
+		<a href="/compose?to={{ message.recipient.username }}" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px;">Send Message</a>
+		{% else %}
+		<a href="/compose?to={{ message.sender.username }}" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px;">Reply</a>
+		{% endif %}
+		<a href="/inbox" style="padding: 10px 20px; background-color: #6c757d; color: white; text-decoration: none; border-radius: 4px;">Back to Inbox</a>
+	</div>
+
+	<hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+	<div style="text-align: center;">
+		<a href="/" style="color: #007bff; text-decoration: none;">Back to Forum</a>
+	</div>
+</div>
+{% endblock %}

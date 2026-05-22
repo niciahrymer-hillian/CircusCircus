@@ -17,6 +17,8 @@ class User(UserMixin, db.Model):
     admin = db.Column(db.Boolean, default=False)
     posts = db.relationship("Post", backref="user")
     comments = db.relationship("Comment", backref="user")
+    sent_messages = db.relationship("Message", foreign_keys="Message.sender_id", backref="sender")
+    received_messages = db.relationship("Message", foreign_keys="Message.recipient_id", backref="recipient")
 
     def __init__(self, email, username, password):
         self.email = email
@@ -114,6 +116,36 @@ class Comment(db.Model):
         else:
             self.savedresponce =  "Just a moment ago!"
         return self.savedresponce
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    sent_at = db.Column(db.DateTime, nullable=False)
+    read = db.Column(db.Boolean, default=False)
+
+    def __init__(self, sender_id, recipient_id, content):
+        self.sender_id = sender_id
+        self.recipient_id = recipient_id
+        self.content = content
+        self.sent_at = datetime.datetime.now()
+        self.read = False
+    
+    def get_time_string(self):
+        now = datetime.datetime.now()
+        diff = now - self.sent_at
+        seconds = diff.total_seconds()
+        if seconds / (60 * 60 * 24 * 30) > 1:
+            return " " + str(int(seconds / (60 * 60 * 24 * 30))) + " months ago"
+        elif seconds / (60 * 60 * 24) > 1:
+            return " " + str(int(seconds / (60 * 60 * 24))) + " days ago"
+        elif seconds / (60 * 60) > 1:
+            return " " + str(int(seconds / (60 * 60))) + " hours ago"
+        elif seconds / (60) > 1:
+            return " " + str(int(seconds / 60)) + " minutes ago"
+        else:
+            return "Just a moment ago!"
 
 def error(errormessage):
 	return "<b style=\"color: red;\">" + errormessage + "</b>"

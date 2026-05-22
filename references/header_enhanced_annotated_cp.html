@@ -1,3 +1,27 @@
+"""
+REFERENCE COPY: Enhanced header.html with Blue Background
+
+FEATURES:
+- Flex layout for horizontal alignment
+- Logo (SVG with invert filter for white appearance)
+- Site name and description in white text
+- Right-aligned user section with:
+  * Welcome message with username
+  * Messages button (semi-transparent)
+  * Settings button (semi-transparent)
+  * Logout button (semi-transparent)
+  * Admin usernames styled in gold
+
+STYLING:
+- Parent container: display flex, gap 20px, space-between
+- Left side: logo + title section
+- Right side: user action buttons
+- All text is white on blue background
+- Buttons have semi-transparent background (rgba(255,255,255,0.2))
+- Rounded corners (border-radius: 4px)
+- Gold color for admin usernames (#ffd700)
+"""
+
 <div style="display: flex; align-items: center; gap: 20px; justify-content: space-between;">
 	<div style="display: flex; align-items: center; gap: 15px;">
 		<img src="{{ url_for('static', filename='logo.svg') }}" alt="Logo" style="height: 40px; width: 40px; filter: brightness(0) invert(1);">

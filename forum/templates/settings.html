@@ -1,0 +1,59 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="container" style="max-width: 600px; margin: 30px auto;">
+	<h2>Account Settings</h2>
+	
+	{% if success_message %}
+	<div class="alert alert-success" style="padding: 12px; background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">
+		{{ success_message }}
+	</div>
+	{% endif %}
+	
+	<div class="settings-section" style="margin-bottom: 30px;">
+		<h4>Update Email Address</h4>
+		<form method="POST" action="/action_update_email">
+			<div style="margin-bottom: 15px;">
+				<label for="current_email" style="display: block; margin-bottom: 5px;"><b>Current Email:</b></label>
+				<input type="email" id="current_email" value="{{ current_user.email }}" disabled style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; background-color: #f5f5f5;">
+			</div>
+			<div style="margin-bottom: 15px;">
+				<label for="new_email" style="display: block; margin-bottom: 5px;"><b>New Email:</b></label>
+				<input type="email" id="new_email" name="new_email" placeholder="Enter new email address" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+			</div>
+			<div style="margin-bottom: 15px;">
+				<label for="email_password" style="display: block; margin-bottom: 5px;"><b>Confirm with Password:</b></label>
+				<input type="password" id="email_password" name="password" placeholder="Enter your password" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+			</div>
+			<button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Update Email</button>
+		</form>
+	</div>
+
+	<hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+
+	<div class="settings-section">
+		<h4>Change Password</h4>
+		<form method="POST" action="/action_change_password">
+			<div style="margin-bottom: 15px;">
+				<label for="current_password" style="display: block; margin-bottom: 5px;"><b>Current Password:</b></label>
+				<input type="password" id="current_password" name="current_password" placeholder="Enter your current password" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+			</div>
+			<div style="margin-bottom: 15px;">
+				<label for="new_password" style="display: block; margin-bottom: 5px;"><b>New Password:</b></label>
+				<input type="password" id="new_password" name="new_password" placeholder="Enter new password" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+			</div>
+			<div style="margin-bottom: 15px;">
+				<label for="confirm_password" style="display: block; margin-bottom: 5px;"><b>Confirm New Password:</b></label>
+				<input type="password" id="confirm_password" name="confirm_password" placeholder="Confirm new password" required style="width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+			</div>
+			<small style="display: block; margin-bottom: 15px; color: #666;">Password must be 6-40 characters with letters, numbers, and special characters (!@#%&)</small>
+			<button type="submit" style="padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">Change Password</button>
+		</form>
+	</div>
+
+	<hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+
+	<div style="text-align: center; margin-top: 20px;">
+		<a href="/" style="color: #007bff; text-decoration: none;">Back to Forum</a>
+	</div>
+</div>
+{% endblock %}
