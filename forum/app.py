@@ -10,6 +10,27 @@ app.config['SITE_NAME'] = 'Sailing Forum'
 app.config['SITE_DESCRIPTION'] = 'A community for sailing enthusiasts'
 app.config['FLASK_DEBUG'] = 1
 
+
+@app.context_processor
+def inject_sidebar_links():
+	preferred_titles = [
+		"Forum",
+		"Announcements",
+		"Bug Reports",
+		"General Discussion",
+		"Other",
+	]
+	matching_subforums = Subforum.query.filter(Subforum.title.in_(preferred_titles)).all()
+	subforums_by_title = {subforum.title: subforum for subforum in matching_subforums}
+
+	sidebar_links = []
+	for title in preferred_titles:
+		subforum = subforums_by_title.get(title)
+		if subforum:
+			sidebar_links.append((title, subforum.id))
+
+	return {'sidebar_links': sidebar_links}
+
 def init_site():
 	print("creating initial subforums")
 	admin = add_subforum("Forum", "Announcements, bug reports, and general discussion about the forum belongs here")

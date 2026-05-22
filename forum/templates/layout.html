@@ -95,11 +95,10 @@
 <div class="main-wrapper">
 	<div class="sidebar">
 		<ul class="sidebar-menu">
-			<li><a href="/">Forum</a></li>
-			<li><a href="/subforum?sub=1">Announcements</a></li>
-			<li><a href="/subforum?sub=2">Bug Reports</a></li>
-			<li><a href="/subforum?sub=3">General Discussion</a></li>
-			<li><a href="/subforum?sub=4">Other</a></li>
+			<li><a href="/">Forum Index</a></li>
+			{% for title, subforum_id in sidebar_links %}
+			<li><a href="/subforum?sub={{ subforum_id }}">{{ title }}</a></li>
+			{% endfor %}
 			{% if current_user.is_authenticated %}
 			<li style="border-top: 1px solid #e0e0e0; margin-top: 20px; padding-top: 20px;">
 				<a href="/inbox">Messages</a>

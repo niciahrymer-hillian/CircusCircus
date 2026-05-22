@@ -1,6 +1,7 @@
 from flask import Flask
 from markupsafe import Markup
 import mistune
+import re
 from forum.routes import rt
 from forum.auth import auth
 from forum.posts import posts
@@ -18,7 +19,22 @@ def create_app():
             return ""
         return Markup(markdown_renderer(text))
 
+    def regex_replace(text, pattern, replacement="", flags=""):
+        if not text:
+            return ""
+
+        re_flags = 0
+        if "i" in flags:
+            re_flags |= re.IGNORECASE
+        if "m" in flags:
+            re_flags |= re.MULTILINE
+        if "s" in flags:
+            re_flags |= re.DOTALL
+
+        return re.sub(pattern, replacement, text, flags=re_flags)
+
     app.jinja_env.filters['markdown'] = render_markdown
+    app.jinja_env.filters['regex_replace'] = regex_replace
 
     # I think more blueprints might be used to break routes up into things like
     # post_routes

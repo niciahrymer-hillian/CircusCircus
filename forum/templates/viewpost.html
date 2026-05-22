@@ -18,10 +18,10 @@
 					</div>
 				</div>
 				<div class="postcontent">
-					{% set content = post.content|safe %}
+					{% set content = post.content|markdown %}
 {% set regex_img = content|regex_replace('(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp))', '<img src="\1" alt="embedded image" style="max-width: 100%; height: auto; margin: 10px 0;">', 'gi') %}
 {% set regex_youtube = regex_img|regex_replace('(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([\w-]+)', '<iframe width="560" height="315" src="https://www.youtube.com/embed/\1" frameborder="0" allowfullscreen style="margin: 10px 0;"></iframe>', 'gi') %}
-{{ regex_youtube }}
+{{ regex_youtube|safe }}
 				</div>
 				<div class="reactions">
 					{% if current_user.is_authenticated %}

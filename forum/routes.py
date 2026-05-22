@@ -5,7 +5,7 @@ import datetime
 from sqlalchemy import func
 from flask import Blueprint, render_template, request, redirect, url_for
 from werkzeug.security import generate_password_hash
-from forum.models import User, Post, Comment, Subforum, Message, valid_content, valid_title, db, generateLinkPath, error
+from forum.models import User, Post, Comment, Subforum, Message, Reaction, valid_content, valid_title, db, generateLinkPath, error
 from forum.user import username_taken, email_taken, valid_username, valid_password
 
 ##
