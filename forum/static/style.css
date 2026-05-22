@@ -311,17 +311,19 @@ textarea:focus {
 	position: relative;
 	display: inline-block;
 	margin-right: 0.6em;
+	padding-bottom: 0.2em;
 }
 
 .reactiontrigger,
 .reactionbutton{
-	background: #f5f5f5;
-	border: 1px solid gray;
+	background: linear-gradient(180deg, #ffffff 0%, #e8f1ff 100%);
+	border: 1px solid #8fb0e6;
 	border-radius: 12px;
-	padding: 0.2em 0.6em;
+	padding: 0.24em 0.7em;
 	margin-right: 0.4em;
 	cursor: pointer;
-	font-size: 10pt;
+	font-size: 11pt;
+	color: #1f3f73;
 }
 
 .reactiontrigger{
@@ -332,7 +334,7 @@ textarea:focus {
 .reactionmenu{
 	display: none;
 	position: absolute;
-	top: calc(100% + 0.35em);
+	top: calc(100% - 0.08em);
 	left: 0;
 	z-index: 20;
 	padding: 0.35em;
@@ -341,6 +343,20 @@ textarea:focus {
 	background: #fff;
 	box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
 	white-space: nowrap;
+}
+
+.reactionpicker.reactionpicker-open-up .reactionmenu{
+	top: auto;
+	bottom: calc(100% - 0.08em);
+	box-shadow: 0 -8px 18px rgba(0, 0, 0, 0.12);
+}
+
+.reactionpicker.measuring-reaction-menu .reactionmenu{
+	display: flex;
+	visibility: hidden;
+	pointer-events: none;
+	gap: 0.35em;
+	align-items: center;
 }
 
 .reactionpicker:hover .reactionmenu,
@@ -356,22 +372,22 @@ textarea:focus {
 
 .reactiontrigger:hover,
 .reactionoption:hover{
-	background: #ececec;
+	background: linear-gradient(180deg, #fff7d7 0%, #ffd978 100%);
 }
 
 .reactionoption{
-	background: #f5f5f5;
-	border: 1px solid gray;
+	background: linear-gradient(180deg, #fffdf4 0%, #ffeab0 100%);
+	border: 1px solid #efc560;
 	border-radius: 999px;
-	padding: 0.28em 0.5em;
+	padding: 0.32em 0.58em;
 	cursor: pointer;
-	font-size: 12pt;
+	font-size: 16pt;
 	line-height: 1;
 }
 
 .active-reaction{
-	border-color: #2059d6;
-	background: #e9f0ff;
+	border-color: #1f61e8;
+	background: linear-gradient(180deg, #eff5ff 0%, #d6e6ff 100%);
 	font-weight: bold;
 }
 
@@ -381,11 +397,14 @@ textarea:focus {
 
 .reactioncount{
 	display: inline-block;
-	border: 1px solid #d5d5d5;
+	border: 1px solid #efc560;
 	border-radius: 12px;
-	padding: 0.2em 0.6em;
+	padding: 0.24em 0.68em;
 	margin-right: 0.4em;
-	background: #fafafa;
+	background: linear-gradient(180deg, #fffdf4 0%, #ffeab0 100%);
+	color: #6a4a00;
+	font-size: 11.5pt;
+	font-weight: 600;
 }
 
 .reactionhint{

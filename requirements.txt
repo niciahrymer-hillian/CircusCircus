@@ -12,3 +12,4 @@ wheel
 honcho
 pytest
 python-dotenv
+psycopg2-binary

@@ -134,5 +134,54 @@
 		<p style="margin-top: 10px; font-size: 0.85rem;">All rights reserved.</p>
 	</div>
 </footer>
+<script>
+(function () {
+	const MENU_MARGIN = 8;
+
+	function positionReactionPicker(picker) {
+		const menu = picker.querySelector('.reactionmenu');
+		if (!menu) {
+			return;
+		}
+
+		picker.classList.add('measuring-reaction-menu');
+		const menuRect = menu.getBoundingClientRect();
+		picker.classList.remove('measuring-reaction-menu');
+
+		const pickerRect = picker.getBoundingClientRect();
+		const spaceBelow = window.innerHeight - pickerRect.bottom;
+		const spaceAbove = pickerRect.top;
+		const shouldOpenUp = spaceBelow < (menuRect.height + MENU_MARGIN) && spaceAbove > spaceBelow;
+
+		picker.classList.toggle('reactionpicker-open-up', shouldOpenUp);
+	}
+
+	function positionAllReactionPickers() {
+		const pickers = document.querySelectorAll('.reactionpicker');
+		for (const picker of pickers) {
+			positionReactionPicker(picker);
+		}
+	}
+
+	function onPointerOrFocus(event) {
+		const picker = event.target.closest('.reactionpicker');
+		if (picker) {
+			positionReactionPicker(picker);
+		}
+	}
+
+	document.addEventListener('mouseover', onPointerOrFocus, true);
+	document.addEventListener('focusin', onPointerOrFocus, true);
+	window.addEventListener('resize', positionAllReactionPickers);
+	window.addEventListener('scroll', positionAllReactionPickers, true);
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', positionAllReactionPickers);
+		return;
+	}
+
+	positionAllReactionPickers();
+})();
+</script>
 </body>
 </html>

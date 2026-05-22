@@ -1,6 +1,6 @@
 <div style="display: flex; align-items: center; gap: 20px; justify-content: space-between;">
 	<div style="display: flex; align-items: center; gap: 15px;">
-		<img src="{{ url_for('static', filename='logo.svg') }}" alt="Logo" style="height: 40px; width: 40px; filter: brightness(0) invert(1);">
+		<img src="{{ url_for('static', filename='logo.svg') }}" alt="Logo" style="height: 64px; width: 64px; border-radius: 14px; background: linear-gradient(135deg, #ffffff 0%, #eaf2ff 100%); padding: 6px; box-shadow: 0 6px 14px rgba(0, 35, 90, 0.25);">
 		<div>
 			<a href="/" style="color: white; text-decoration: none; font-size: 24px; font-weight: bold;">{{ config.SITE_NAME }}</a>
 			{% if config.SITE_DESCRIPTION %}<br><span style="color: rgba(255, 255, 255, 0.9); font-size: 12px;">{{ config.SITE_DESCRIPTION }}</span>{% endif %}

@@ -4,6 +4,38 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VENV_DIR="$ROOT_DIR/.venv"
 
+ensure_postgres_available() {
+  local env_file="$ROOT_DIR/.env"
+  local db_url=""
+
+  if [[ -f "$env_file" ]]; then
+    db_url="$(grep '^DATABASE_URL=' "$env_file" | tail -n 1 | cut -d= -f2- || true)"
+  fi
+
+  if [[ "$db_url" != postgresql://* && "$db_url" != postgresql+psycopg2://* ]]; then
+    return 0
+  fi
+
+  if ! command -v docker >/dev/null 2>&1; then
+    echo "PostgreSQL DATABASE_URL detected, but Docker is not installed or not on PATH."
+    echo "Proceeding with local PostgreSQL expectation."
+    return 0
+  fi
+
+  if ! docker info >/dev/null 2>&1; then
+    echo "PostgreSQL DATABASE_URL detected, but Docker daemon is not running."
+    echo "Proceeding with local PostgreSQL expectation."
+    return 0
+  fi
+
+  if [[ -f "$ROOT_DIR/docker-compose.yml" ]]; then
+    echo "Starting PostgreSQL container service (db)..."
+    if ! docker compose -f "$ROOT_DIR/docker-compose.yml" up -d db >/dev/null 2>&1; then
+      echo "Could not start docker compose db service; continuing with existing PostgreSQL setup."
+    fi
+  fi
+}
+
 find_running_port() {
   local port
   for port in $(seq 5006 5020); do
@@ -43,6 +75,8 @@ fi
 
 echo "Installing/refreshing dependencies"
 "$PYTHON_BIN" -m pip install -r "$ROOT_DIR/requirements.txt"
+
+ensure_postgres_available
 
 RUNNING_PORT="$(find_running_port || true)"
 if [[ -n "$RUNNING_PORT" ]]; then

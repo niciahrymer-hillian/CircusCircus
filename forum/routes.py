@@ -17,13 +17,19 @@ REACTION_OPTIONS = (
 	("like", "👍", "Like"),
 	("dislike", "👎", "Dislike"),
 	("heart", "❤️", "Heart"),
+	("laugh", "😂", "Laugh"),
+	("celebrate", "🎉", "Celebrate"),
+	("fire", "🔥", "Fire"),
+	("thinking", "🤔", "Thinking"),
+	("sad", "😢", "Sad"),
 )
 ALLOWED_REACTIONS = {reaction_type for reaction_type, _, _ in REACTION_OPTIONS}
 
 def get_reaction_data(post_ids):
+	default_counts = {reaction_type: 0 for reaction_type, _, _ in REACTION_OPTIONS}
 	counts_by_post = {}
 	for post_id in post_ids:
-		counts_by_post[post_id] = {"like": 0, "dislike": 0, "heart": 0}
+		counts_by_post[post_id] = default_counts.copy()
 
 	if not post_ids:
 		return counts_by_post, {}

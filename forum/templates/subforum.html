@@ -60,13 +60,9 @@
 			<div class="reactionpicker">
 				<button type="button" class="reactiontrigger {% if user_reactions.get(post.id) %}active-reaction{% endif %}">
 					{% if user_reactions.get(post.id) %}
-						{% for reaction_type, emoji, label in reaction_options %}
-							{% if user_reactions.get(post.id) == reaction_type %}
-								{{ emoji }} {{ reaction_counts[post.id][reaction_type] }}
-							{% endif %}
-						{% endfor %}
+						Reacted
 					{% else %}
-						😀 React
+						React
 					{% endif %}
 				</button>
 				<div class="reactionmenu">
