@@ -1,6 +1,7 @@
 Flask
 Flask-Login
 Flask-SQLAlchemy
+mistune
 gunicorn
 itsdangerous
 Jinja2
@@ -9,3 +10,5 @@ SQLAlchemy
 Werkzeug
 wheel
 honcho
+pytest
+python-dotenv

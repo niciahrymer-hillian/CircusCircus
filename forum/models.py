@@ -19,6 +19,7 @@ class User(UserMixin, db.Model):
     comments = db.relationship("Comment", backref="user")
     sent_messages = db.relationship("Message", foreign_keys="Message.sender_id", backref="sender")
     received_messages = db.relationship("Message", foreign_keys="Message.recipient_id", backref="recipient")
+    reactions = db.relationship("Reaction", backref="user")
 
     def __init__(self, email, username, password):
         self.email = email
@@ -31,7 +32,9 @@ class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.Text)
     content = db.Column(db.Text)
+    is_public = db.Column(db.Boolean, default=True, nullable=False)
     comments = db.relationship("Comment", backref="post")
+    reactions = db.relationship("Reaction", backref="post")
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     subforum_id = db.Column(db.Integer, db.ForeignKey('subforum.id'))
     postdate = db.Column(db.DateTime)
@@ -146,6 +149,18 @@ class Message(db.Model):
             return " " + str(int(seconds / 60)) + " minutes ago"
         else:
             return "Just a moment ago!"
+class Reaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    reaction_type = db.Column(db.String(16), nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint('user_id', 'post_id', name='uq_reaction_user_post'),
+    )
+
+    def __init__(self, reaction_type):
+        self.reaction_type = reaction_type
 
 def error(errormessage):
 	return "<b style=\"color: red;\">" + errormessage + "</b>"

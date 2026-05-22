@@ -1,80 +1,119 @@
 {% extends 'layout.html' %}
 {% block body %}
-{{ path|safe}}
-
-<div class="actualpost">
-	<div class="actualposttitle">
-		<a href="/viewpost?post={{ post.id }}">{{post.title}}</a>
-		<div class="postposter" {% if post.user.admin %} style="color: red;" {% endif %}>
-			{{ post.user.username }}
-
-		</div>
-		<div class="posttime">
-			{{ post.get_time_string() }}
+<div class="container">
+	<div class="row">
+		<div class="col">
+			{{ path|safe }}
+			<div class="actualpost">
+				<div class="actualposttitle">
+					<a href="/viewpost?post={{ post.id }}">{{ post.title }}</a>
+					{% if current_user.is_authenticated and not post.is_public %}
+					<span class="visibilitybadge">Private</span>
+					{% endif %}
+					<div class="postposter" {% if post.user.admin %} style="color: red;" {% endif %}>
+						{{ post.user.username }}
+					</div>
+					<div class="posttime">
+						{{ post.get_time_string() }}
+					</div>
+				</div>
+				<div class="postcontent">
+					{% set content = post.content|safe %}
+{% set regex_img = content|regex_replace('(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp))', '<img src="\1" alt="embedded image" style="max-width: 100%; height: auto; margin: 10px 0;">', 'gi') %}
+{% set regex_youtube = regex_img|regex_replace('(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([\w-]+)', '<iframe width="560" height="315" src="https://www.youtube.com/embed/\1" frameborder="0" allowfullscreen style="margin: 10px 0;"></iframe>', 'gi') %}
+{{ regex_youtube }}
+				</div>
+				<div class="reactions">
+					{% if current_user.is_authenticated %}
+					<div class="reactionpicker">
+						<button type="button" class="reactiontrigger {% if user_reaction %}active-reaction{% endif %}">
+							{% if user_reaction %}
+								{% for reaction_type, emoji, label in reaction_options %}
+									{% if user_reaction == reaction_type %}
+										{{ emoji }} {{ post_reaction_counts[reaction_type] }}
+									{% endif %}
+								{% endfor %}
+							{% else %}
+								😀 React
+							{% endif %}
+						</button>
+						<div class="reactionmenu">
+							{% for reaction_type, emoji, label in reaction_options %}
+							<form class="reactionform" action="/action_react?post={{ post.id }}&type={{ reaction_type }}" method="POST">
+								<input type="hidden" name="next" value="{{ current_path }}">
+								<button type="submit" class="reactionoption {% if user_reaction == reaction_type %}active-reaction{% endif %}" title="{{ label }}">{{ emoji }}</button>
+							</form>
+							{% endfor %}
+						</div>
+					</div>
+					<div class="reactionsummary">
+						{% for reaction_type, emoji, label in reaction_options %}
+							{% if post_reaction_counts[reaction_type] > 0 %}
+							<span class="reactioncount {% if user_reaction == reaction_type %}active-reaction{% endif %}">{{ emoji }} {{ post_reaction_counts[reaction_type] }}</span>
+							{% endif %}
+						{% endfor %}
+					</div>
+					<div class="reactionhint">Hover to choose an emoji. Click the same emoji again to remove it.</div>
+					{% else %}
+					<div class="reactionsummary">
+						{% for reaction_type, emoji, label in reaction_options %}
+							{% if post_reaction_counts[reaction_type] > 0 %}
+							<span class="reactioncount">{{ emoji }} {{ post_reaction_counts[reaction_type] }}</span>
+							{% endif %}
+						{% endfor %}
+					</div>
+					{% endif %}
+				</div>
+			</div>
+			<div style="text-align: center;">
+				{% if current_user.is_authenticated %}
+				{% if comment_error == 'empty' %}
+				<div class="error">Comment cannot be empty.</div>
+				{% endif %}
+				<input type="button" id="displayaddcomment" onclick="toggleCommentForm()" value="Add a comment">
+				<div class="addcomment" id="addcomment">
+					<form action="/action_comment?post={{ post.id }}" method="POST">
+						<textarea class="inputbox varwidth" rows="6" name="content" placeholder="Write your comment..."></textarea><br>
+						<input class="inputbox" style="margin-bottom: 1%;" type="submit" value="Comment">
+					</form>
+				</div>
+				{% else %}
+				<a href="/loginform">Login or register to make a comment</a>
+				{% endif %}
+			</div>
+			{% if comments.first() %}
+			<div class="comments">
+				{% for comment in comments %}
+				<div class="comment">
+					<div class="commentuser">
+						<span {% if comment.user.admin %} style="color: red;" {% endif %}>{{ comment.user.username }}</span>
+					</div>
+					<div class="commenttime">
+						{{ comment.get_time_string() }}
+					</div>
+					<div class="commentcontent">
+						{{ comment.content }}
+					</div>
+				</div>
+				{% endfor %}
+			</div>
+			{% endif %}
 		</div>
 	</div>
-	<div class="postcontent">
-		{% set content = post.content|safe %}
-		{% set regex_img = content|regex_replace('(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp))', '<img src="\1" alt="embedded image" style="max-width: 100%; height: auto; margin: 10px 0;">', 'gi') %}
-		{% set regex_youtube = regex_img|regex_replace('(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([\w-]+)', '<iframe width="560" height="315" src="https://www.youtube.com/embed/\1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="margin: 10px 0;"></iframe>', 'gi') %}
-		{{ regex_youtube }}
-	</div>
-
 </div>
-<div class="addcomment" id="addcomment">
-	<form action="/action_comment?post={{ post.id }}" method="POST">
-		<textarea class="inputbox varwidth" rows="6" name="content"></textarea><br>
-		<input class="inputbox" style="margin-bottom: 1%;" type="submit" value="Comment">
-	</form>
-</div>
-<div style="text-align: center;">
-
-	
-
-	{% if current_user.is_authenticated %}
-	<input type="button" id="displayaddcomment" onclick="toggle()" value="Add a comment">
-
-	{% else %}
-	<a href="/loginform">Login or register to make a comment</a>
-	{% endif %}
-</div>
-{%if comments%}
-<div class="comments">
-{% for comment in comments %}
-	
-	<div class="comment">
-		<div class="commentuser">
-			(<span  {% if comment.user.admin %} style="color: red;" {% endif %}>{{ comment.user.username }}</span>) - 
-		</div>
-		<div class="commentcontent">
-			{{ comment.content }}
-		</div>
-		
-		<div class="commenttime">
-			{{ comment.get_time_string() }}
-		</div>
-	</div>
-	<br>
-	
-{% endfor %}
-</div>
-{% endif %}
-<script type="text/javascript">
-function toggle(){
-	var div = document.getElementById("addcomment");
-	var button = document.getElementById("displayaddcomment")
-	if(div.style.display == "none" || div.style.display.trim() == ""){
-		div.style.display = "inline";
-		button.value="Hide";
-	}else{
-		div.style.display = "none";
-		button.value="Add a comment"
+<script>
+function toggleCommentForm() {
+	const form = document.getElementById('addcomment');
+	if (!form) {
+		return;
 	}
-	
+	if (form.style.display === 'block') {
+		form.style.display = 'none';
+		return;
+	}
+	form.style.display = 'block';
 }
 </script>
-
-
 {% endblock %}
 
 

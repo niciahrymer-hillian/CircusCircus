@@ -32,19 +32,62 @@ On first run, the default subforums will be created. Although custom subforums a
 I had to make a bunch of changes in this code to get it running. Took far longer than it should.
 But now, if I have it right, you need to clone this and then
 
-This currently puts a sqlite3 db in the /tmp directory.
-(use atleast python 3.11)
+This currently puts a sqlite3 db in the `instance/` directory.
+(use at least python 3.11)
+
+## Run Locally
+
+1. Open a terminal and go to the project root.
+2. Start the app with the one-click launcher.
+3. Open the app in your browser.
 
 ```
-$ python3.11 -m venv venv
-$ source venv/bin/activate
-$ pip install -r requirements.txt
-$ ./run.sh
+$ cd /Users/shocka/CircusCircus
+$ ./start_app.sh
 ```
 
-and it should appear on port 5000
+On macOS, you can also double-click `start_app.command` in Finder.
 
-`http://0.0.0.0:5000`
+The app runs on port 5006:
+http://127.0.0.1:5006
+
+If port 5006 is already in use, `run.sh` automatically selects the next open port.
+
+### Environment variables (.env)
+
+The app loads environment variables from `.env` (via `python-dotenv`).
+
+- `SECRET_KEY`: recommended for sessions/login.
+- `DATABASE_URL`: optional; defaults to local SQLite (`sqlite:///circuscircus.db`).
+
+Example:
+
+```env
+SECRET_KEY=replace-this-with-a-random-secret
+DATABASE_URL=sqlite:///circuscircus.db
+```
+
+## Troubleshooting
+
+- Port already in use
+  - `run.sh` auto-increments to the next open port.
+  - To force a port manually:
+    - `PORT=5007 ./run.sh`
+  - To find/stop the process using port 5006:
+    - `lsof -i :5006`
+
+- Missing `.env` / session errors
+  - Ensure `SECRET_KEY` is set in `.env`.
+  - Install dependencies in the active venv:
+    - `pip install -r requirements.txt`
+
+- Missing package/module errors
+  - Reinstall dependencies in the active venv:
+    - `pip install -r requirements.txt`
+
+- App not loading at `127.0.0.1:5006`
+  - Confirm the server is running and that you launched from the project root with:
+    - `./run.sh`
 
 ## Changes in 2023
 
