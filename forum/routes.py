@@ -4,8 +4,9 @@ from flask_login.utils import login_required
 import datetime
 from sqlalchemy import func
 from flask import Blueprint, render_template, request, redirect, url_for
-from forum.models import User, Post, Comment, Subforum, Reaction, valid_content, valid_title, db, generateLinkPath, error
-from forum.user import username_taken, email_taken, valid_username
+from werkzeug.security import generate_password_hash
+from forum.models import User, Post, Comment, Subforum, Message, valid_content, valid_title, db, generateLinkPath, error
+from forum.user import username_taken, email_taken, valid_username, valid_password
 
 ##
 # This file needs to be broken up into several, to make the project easier to work on.
@@ -180,4 +181,121 @@ def action_post():
 	user.posts.append(post)
 	db.session.commit()
 	return redirect("/viewpost?post=" + str(post.id))
+
+@login_required
+@rt.route('/settings')
+def settings():
+	return render_template("settings.html")
+
+@login_required
+@rt.route('/action_update_email', methods=['POST'])
+def action_update_email():
+	new_email = request.form.get('new_email')
+	password = request.form.get('password')
+	errorrs = []
+	
+	# Validate password
+	if not current_user.check_password(password):
+		errorrs.append("Password is incorrect!")
+		return render_template("settings.html", errors=errorrs)
+	
+	# Check if email is already taken
+	if email_taken(new_email):
+		errorrs.append("This email is already in use!")
+		return render_template("settings.html", errors=errorrs)
+	
+	# Update email
+	current_user.email = new_email
+	db.session.commit()
+	return render_template("settings.html", success_message="Email updated successfully!")
+
+@login_required
+@rt.route('/action_change_password', methods=['POST'])
+def action_change_password():
+	current_password = request.form.get('current_password')
+	new_password = request.form.get('new_password')
+	confirm_password = request.form.get('confirm_password')
+	errorrs = []
+	
+	# Validate current password
+	if not current_user.check_password(current_password):
+		errorrs.append("Current password is incorrect!")
+		
+	# Validate new passwords match
+	if new_password != confirm_password:
+		errorrs.append("New passwords do not match!")
+		
+	# Validate password format
+	if not valid_password(new_password):
+		errorrs.append("Password must be 6-40 characters with letters, numbers, and special characters (!@#%&)!")
+		
+	if errorrs:
+		return render_template("settings.html", errors=errorrs)
+	
+	# Update password
+	current_user.password_hash = generate_password_hash(new_password)
+	db.session.commit()
+	return render_template("settings.html", success_message="Password changed successfully!")
+
+@login_required
+@rt.route('/inbox')
+def inbox():
+	# Get all messages for current user (sent and received)
+	received = Message.query.filter(Message.recipient_id == current_user.id).order_by(Message.sent_at.desc()).all()
+	sent = Message.query.filter(Message.sender_id == current_user.id).order_by(Message.sent_at.desc()).all()
+	return render_template("inbox.html", received=received, sent=sent)
+
+@login_required
+@rt.route('/compose', methods=['GET', 'POST'])
+def compose():
+	if request.method == 'GET':
+		to_username = request.args.get('to', '')
+		return render_template("compose.html", to_username=to_username)
+	
+	if request.method == 'POST':
+		recipient_username = request.form.get('recipient')
+		content = request.form.get('content')
+		errors = []
+		
+		# Validate content
+		if not content or len(content) < 1:
+			errors.append("Message cannot be empty!")
+		if len(content) > 5000:
+			errors.append("Message cannot exceed 5000 characters!")
+		
+		# Find recipient
+		recipient = User.query.filter(User.username == recipient_username).first()
+		if not recipient:
+			errors.append("User not found!")
+		
+		# Prevent self-messages
+		if recipient and recipient.id == current_user.id:
+			errors.append("You cannot send messages to yourself!")
+		
+		if errors:
+			return render_template("compose.html", to_username=recipient_username, errors=errors)
+		
+		# Create and save message
+		message = Message(current_user.id, recipient.id, content)
+		db.session.add(message)
+		db.session.commit()
+		return redirect("/inbox")
+
+@login_required
+@rt.route('/message/<int:message_id>')
+def view_message(message_id):
+	message = Message.query.filter(Message.id == message_id).first()
+	if not message:
+		return error("Message not found!")
+	
+	# Verify user is either sender or recipient
+	if message.sender_id != current_user.id and message.recipient_id != current_user.id:
+		return error("You don't have permission to view this message!")
+	
+	# Mark as read if recipient is viewing it
+	if message.recipient_id == current_user.id and not message.read:
+		message.read = True
+		db.session.commit()
+	
+	return render_template("message.html", message=message)
 

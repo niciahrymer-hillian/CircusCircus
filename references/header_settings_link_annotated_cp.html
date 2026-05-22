@@ -1,0 +1,24 @@
+"""
+REFERENCE COPY: header.html Updated
+Added settings link for authenticated users
+
+CHANGE:
+- Added settings link in authenticated user section
+- Link placed between username and logout link
+- Settings link goes to /settings route
+- Uses same styling as logout link for consistency
+"""
+
+<div style="display: flex; align-items: center; gap: 15px; padding: 10px 0; border-bottom: 2px solid #f0f0f0;">
+	<img src="{{ url_for('static', filename='logo.png') }}" alt="CircusCircus logo" style="height: 40px; width: 40px;">
+	<a href="/" id="nolinks"><b>{{ config.SITE_NAME }}</b></a>{% if config.SITE_DESCRIPTION %} - {% endif %} <i>{{ config.SITE_DESCRIPTION }}</i>
+	<div class="login" style="margin-left: auto;">
+		{% if current_user.is_authenticated %}
+		<b {% if current_user.admin %} style="color: red;" {% endif %}>{{ current_user.username }}</b>
+		<a class="logoutlink" href="/settings" style="margin: 0 8px;">(settings)</a>
+		<a class="logoutlink" href="/action_logout">(logout)</a>
+		{% else %}
+		<a href="/loginform">Click here to login or register!</a>
+		{% endif %}
+	</div>
+</div>

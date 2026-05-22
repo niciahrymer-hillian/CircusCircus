@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="container" style="max-width: 800px; margin: 30px auto;">
+	<h2>Messages</h2>
+	
+	<div style="margin-bottom: 20px;">
+		<a href="/compose" style="display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 4px;">Compose New Message</a>
+	</div>
+
+	<h3>Received Messages</h3>
+	{% if received %}
+	<div style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">
+		{% for msg in received %}
+		<div style="padding: 15px; border-bottom: 1px solid #eee; background-color: {% if msg.read %}#f9f9f9{% else %}#e8f4f8{% endif %};">
+			<div style="display: flex; justify-content: space-between; align-items: center;">
+				<div>
+					<b>From: <a href="#" style="color: #007bff; text-decoration: none;">{{ msg.sender.username }}</a></b>
+					{% if not msg.read %}<span style="background-color: #0d6efd; color: white; padding: 2px 8px; border-radius: 3px; font-size: 0.8rem; margin-left: 10px;">NEW</span>{% endif %}
+				</div>
+				<small style="color: #666;">{{ msg.get_time_string() }}</small>
+			</div>
+			<p style="margin: 10px 0 0 0; color: #333;">{{ msg.content[:100] }}{% if msg.content|length > 100 %}...{% endif %}</p>
+			<div style="margin-top: 10px;">
+				<a href="/message/{{ msg.id }}" style="color: #007bff; text-decoration: none; font-size: 0.9rem;">View Full Message</a>
+				<a href="/compose?to={{ msg.sender.username }}" style="color: #007bff; text-decoration: none; font-size: 0.9rem; margin-left: 15px;">Reply</a>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	{% else %}
+	<p style="color: #666;">No received messages yet.</p>
+	{% endif %}
+
+	<hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+
+	<h3>Sent Messages</h3>
+	{% if sent %}
+	<div style="border: 1px solid #ddd; border-radius: 4px; overflow: hidden;">
+		{% for msg in sent %}
+		<div style="padding: 15px; border-bottom: 1px solid #eee;">
+			<div style="display: flex; justify-content: space-between; align-items: center;">
+				<div>
+					<b>To: <a href="#" style="color: #007bff; text-decoration: none;">{{ msg.recipient.username }}</a></b>
+				</div>
+				<small style="color: #666;">{{ msg.get_time_string() }}</small>
+			</div>
+			<p style="margin: 10px 0 0 0; color: #333;">{{ msg.content[:100] }}{% if msg.content|length > 100 %}...{% endif %}</p>
+			<div style="margin-top: 10px;">
+				<a href="/message/{{ msg.id }}" style="color: #007bff; text-decoration: none; font-size: 0.9rem;">View</a>
+			</div>
+		</div>
+		{% endfor %}
+	</div>
+	{% else %}
+	<p style="color: #666;">No sent messages yet.</p>
+	{% endif %}
+
+	<hr style="margin: 30px 0; border: none; border-top: 1px solid #ddd;">
+	<div style="text-align: center;">
+		<a href="/" style="color: #007bff; text-decoration: none;">Back to Forum</a>
+	</div>
+</div>
+{% endblock %}
