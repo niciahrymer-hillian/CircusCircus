@@ -2,6 +2,7 @@ from flask import render_template, request, redirect, url_for
 from flask_login import current_user, login_user, logout_user
 from flask_login.utils import login_required
 import datetime
+import re
 from sqlalchemy import func
 from flask import Blueprint, render_template, request, redirect, url_for
 from werkzeug.security import generate_password_hash
@@ -24,6 +25,76 @@ REACTION_OPTIONS = (
 	("sad", "😢", "Sad"),
 )
 ALLOWED_REACTIONS = {reaction_type for reaction_type, _, _ in REACTION_OPTIONS}
+
+VIDEO_EXTENSIONS = (".mp4", ".webm", ".ogg")
+
+def extract_youtube_id(url):
+	patterns = (
+		r'youtu\.be/([A-Za-z0-9_-]{11})',
+		r'youtube\.com/watch\?(?:[^\s]*&)?v=([A-Za-z0-9_-]{11})',
+		r'youtube\.com/shorts/([A-Za-z0-9_-]{11})',
+		r'youtube\.com/embed/([A-Za-z0-9_-]{11})',
+	)
+	for pattern in patterns:
+		match = re.search(pattern, url, flags=re.IGNORECASE)
+		if match:
+			return match.group(1)
+	return None
+
+def parse_video_url(video_url):
+	if not video_url:
+		return None
+
+	url = video_url.strip()
+	lower_url = url.lower()
+
+	if lower_url.startswith("/static/") and lower_url.endswith(VIDEO_EXTENSIONS):
+		return {"kind": "file", "src": url}
+
+	if lower_url.startswith("http://") or lower_url.startswith("https://"):
+		youtube_id = extract_youtube_id(url)
+		if youtube_id:
+			watch_url = "https://www.youtube.com/watch?v=" + youtube_id
+			embed_url = "https://www.youtube.com/embed/" + youtube_id
+			return {"kind": "youtube", "watch_url": watch_url, "embed_url": embed_url}
+		if lower_url.endswith(VIDEO_EXTENSIONS):
+			return {"kind": "file", "src": url}
+
+	return None
+
+def extract_post_video(content):
+	marker_match = re.search(r'(?im)^\[video\]\s+(\S+)\s*$', content)
+	if marker_match:
+		video_url = marker_match.group(1)
+		clean_content = re.sub(r'(?im)^\[video\]\s+\S+\s*$', '', content).strip()
+		return clean_content, parse_video_url(video_url)
+
+	trimmed_content = content.rstrip()
+	if not trimmed_content:
+		return content, None
+
+	lines = trimmed_content.splitlines()
+	last_line = lines[-1].strip()
+	url_candidate = None
+
+	if re.fullmatch(r'(?:https?://\S+|/static/\S+)', last_line):
+		url_candidate = last_line
+	else:
+		markdown_link_match = re.fullmatch(r'\[[^\]]+\]\(([^)]+)\)', last_line)
+		if markdown_link_match:
+			url_candidate = markdown_link_match.group(1).strip()
+
+	video_data = parse_video_url(url_candidate)
+	if video_data:
+		clean_content = "\n".join(lines[:-1]).strip()
+		return clean_content, video_data
+
+	return content, None
+
+def valid_video_url(video_url):
+	if not video_url:
+		return True
+	return parse_video_url(video_url) is not None
 
 def get_reaction_data(post_ids):
 	default_counts = {reaction_type: 0 for reaction_type, _, _ in REACTION_OPTIONS}
@@ -106,9 +177,10 @@ def viewpost():
 	if not subforumpath:
 		subforumpath = generateLinkPath(post.subforum.id)
 		post.subforum.path = subforumpath
+	post_content, post_video = extract_post_video(post.content)
 	comments = Comment.query.filter(Comment.post_id == postid).order_by(Comment.id.desc()) # no need for scalability now
 	reaction_counts, user_reactions = get_reaction_data([post.id])
-	return render_template("viewpost.html", post=post, path=subforumpath, comments=comments, comment_error=comment_error, post_reaction_counts=reaction_counts.get(post.id), user_reaction=user_reactions.get(post.id), reaction_options=REACTION_OPTIONS, current_path="/viewpost?post=" + str(post.id))
+	return render_template("viewpost.html", post=post, path=subforumpath, post_content=post_content, post_video=post_video, comments=comments, comment_error=comment_error, post_reaction_counts=reaction_counts.get(post.id), user_reaction=user_reactions.get(post.id), reaction_options=REACTION_OPTIONS, current_path="/viewpost?post=" + str(post.id))
 
 @login_required
 @rt.route('/action_react', methods=['POST'])
@@ -170,6 +242,7 @@ def action_post():
 	user = current_user
 	title = request.form['title']
 	content = request.form['content']
+	video_url = request.form.get('video_url', '').strip()
 	#check for valid posting
 	errors = []
 	retry = False
@@ -179,8 +252,13 @@ def action_post():
 	if not valid_content(content):
 		errors.append("Post must be between 10 and 5000 characters long!")
 		retry = True
+	if video_url and not valid_video_url(video_url):
+		errors.append("Video URL must be a YouTube link, direct .mp4/.webm/.ogg link, or /static/... video path.")
+		retry = True
 	if retry:
 		return render_template("createpost.html",subforum=subforum,  errors=errors)
+	if video_url:
+		content = content.rstrip() + "\n\n[video] " + video_url
 	post = Post(title, content, datetime.datetime.now())
 	post.is_public = request.form.get("is_public") == "on"
 	subforum.posts.append(post)

@@ -18,10 +18,19 @@
 					</div>
 				</div>
 				<div class="postcontent">
-					{% set content = post.content|markdown %}
+					{% set content = post_content|markdown %}
 {% set regex_img = content|regex_replace('(https?:\/\/[^\s]+\.(?:jpg|jpeg|png|gif|webp))', '<img src="\1" alt="embedded image" style="max-width: 100%; height: auto; margin: 10px 0;">', 'gi') %}
-{% set regex_youtube = regex_img|regex_replace('(?:https?:\/\/)?(?:www\.)?youtube\.com\/watch\?v=([\w-]+)', '<iframe width="560" height="315" src="https://www.youtube.com/embed/\1" frameborder="0" allowfullscreen style="margin: 10px 0;"></iframe>', 'gi') %}
-{{ regex_youtube|safe }}
+{{ regex_img|safe }}
+					{% if post_video %}
+						{% if post_video.kind == 'youtube' %}
+						<iframe width="560" height="315" src="{{ post_video.embed_url }}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen style="max-width: 100%; margin: 10px 0;"></iframe>
+						<div><a href="{{ post_video.watch_url }}" target="_blank" rel="noopener">Open on YouTube</a></div>
+						{% elif post_video.kind == 'file' %}
+						<video controls playsinline preload="metadata" style="max-width: 100%; height: auto; margin: 10px 0;">
+							<source src="{{ post_video.src }}">
+						</video>
+						{% endif %}
+					{% endif %}
 				</div>
 				<div class="reactions">
 					{% if current_user.is_authenticated %}
